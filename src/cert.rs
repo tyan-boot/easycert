@@ -264,7 +264,12 @@ impl Cert {
             let pem = x509.to_pem().unwrap();
             f.write(pem.as_slice()).unwrap();
 
-            println!("New cert created to {} {}", key_name, pem_name);
+            println!("Created new certificate for");
+
+            for name in &names {
+                println!(" * {}", name);
+            }
+            println!("\nCertificate saved to {} with key {}", key_name, pem_name);
         } else {
             eprintln!("No ca found, please init first!");
         }
