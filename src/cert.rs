@@ -167,9 +167,9 @@ impl Cert {
         }
     }
 
-    pub fn new_cert(&mut self, names: Vec<&str>, out_name: Option<&str>) {
+    pub fn new_cert(&mut self, names: Vec<&str>, length: u32, out_name: Option<&str>) {
         if let (Some(ref ca), Some(ref ca_key)) = (&self.ca, &self.pkey) {
-            let pkey = self.generate_key(4096);
+            let pkey = self.generate_key(length);
 
             let first_name = &names[0];
 

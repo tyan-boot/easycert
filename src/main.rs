@@ -23,14 +23,14 @@ fn main() {
                         .long("cn")
                         .short("n")
                         .help("common name of cert")
-                        .takes_value(true)
+                        .takes_value(true),
                 )
                 .arg(
                     Arg::with_name("length")
                         .long("len")
                         .short("l")
                         .help("length of key, default 2048")
-                        .takes_value(true)
+                        .takes_value(true),
                 )
                 .arg(
                     Arg::with_name("force")
@@ -54,6 +54,13 @@ fn main() {
                         .long("out")
                         .short("o")
                         .help("output file name of cert"),
+                )
+                .arg(
+                    Arg::with_name("length")
+                        .long("length")
+                        .short("l")
+                        .help("lengh of key, default 2048")
+                        .takes_value(true),
                 ),
         );
 
@@ -64,7 +71,7 @@ fn main() {
     if let Some(matches) = matches.subcommand_matches("init") {
         let length: u32 = matches
             .value_of("length")
-            .unwrap_or("4096")
+            .unwrap_or("2048")
             .parse()
             .unwrap();
         let cn = matches.value_of("common name");
@@ -90,7 +97,13 @@ fn main() {
             let names: Vec<&str> = names.collect();
 
             let out_name = matches.value_of("output");
-            c.new_cert(names, out_name);
+
+            let length: u32 = matches
+                .value_of("length")
+                .unwrap_or("2048")
+                .parse()
+                .unwrap();
+            c.new_cert(names, length, out_name);
         } else {
             eprintln!("must provide a name!");
         }
