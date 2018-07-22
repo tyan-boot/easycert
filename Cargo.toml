@@ -1,0 +1,13 @@
+[package]
+name = "easycert"
+version = "0.1.0"
+authors = ["Tyan Boot"]
+
+[dependencies]
+openssl = "0.10.0"
+clap = "2.32.0"
+rand = "0.5.4"
+
+[target.x86_64-pc-windows-msvc.dependencies]
+gdi32-sys = "0.2.0"
+user32-sys = "0.2.0"
