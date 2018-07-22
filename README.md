@@ -47,6 +47,19 @@ Certificate:
 ```
 <p align="center"><img alt="img" src="https://i.loli.net/2018/07/22/5b54583ce5901.png"></p>
 
+# Feature
+
+* [x] custom common name for CA
+* [x] custom key length for CA and key
+* [x] SAN support (via SubjectAlternativeName)
+
+__COMING SOON__
+
+* [ ] install CA to trusted store
+* [ ] issue multiple cert at once
+
+...and more
+
 # Installation
 
 ## Download pre-built binary from Github release
