@@ -53,7 +53,8 @@ fn main() {
                     Arg::with_name("output")
                         .long("out")
                         .short("o")
-                        .help("output file name of cert"),
+                        .help("output file name of cert, without extension")
+                        .takes_value(true),
                 )
                 .arg(
                     Arg::with_name("length")
