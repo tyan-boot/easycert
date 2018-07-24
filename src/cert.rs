@@ -130,7 +130,8 @@ impl Cert {
         x509.append_extension(sid).unwrap();
 
         let mut aid = AuthorityKeyIdentifier::new();
-        let aid = aid.keyid(true)
+        let aid = aid
+            .keyid(true)
             .build(&x509.x509v3_context(None, None))
             .unwrap();
         x509.append_extension(aid).unwrap();
