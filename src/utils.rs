@@ -1,6 +1,7 @@
 use std::env;
 use std::str;
 
+#[cfg(target_os = "linux")]
 extern "C" {
     fn gethostname(name: *mut u8, len: usize) -> u32;
 }
