@@ -1,7 +1,9 @@
+extern crate dirs;
 extern crate openssl;
 extern crate rand;
 
 use std::fs::File;
+use std::fs::DirBuilder;
 use std::io::Read;
 use std::io::Write;
 use std::net::IpAddr;
@@ -20,6 +22,8 @@ use self::openssl::x509::X509Extension;
 use self::openssl::x509::*;
 
 use self::rand::prelude::random;
+
+use super::utils;
 
 pub struct Cert {
     ca: Option<X509>,
@@ -41,7 +45,7 @@ impl Cert {
     }
 
     pub fn init(&mut self, name: &str, length: u32, force: bool) {
-        if (Path::new("ca.key").exists() || Path::new("ca.pem").exists()) && !force {
+        if (Path::new(&utils::key_path()).exists() || Path::new(&utils::ca_path()).exists()) && !force {
             eprintln!(
                 "{}",
                 "old ca exist, use -f or --force to force init a new ca"
@@ -55,8 +59,8 @@ impl Cert {
     }
 
     pub fn load_ca(&mut self) -> bool {
-        let ca = File::open("ca.pem");
-        let key = File::open("ca.key");
+        let ca = File::open(utils::ca_path());
+        let key = File::open(utils::key_path());
 
         if let (Ok(mut ca), Ok(mut key)) = (ca, key) {
             let mut buf = Vec::<u8>::new();
@@ -130,8 +134,7 @@ impl Cert {
         x509.append_extension(sid).unwrap();
 
         let mut aid = AuthorityKeyIdentifier::new();
-        let aid = aid
-            .keyid(true)
+        let aid = aid.keyid(true)
             .build(&x509.x509v3_context(None, None))
             .unwrap();
         x509.append_extension(aid).unwrap();
@@ -145,17 +148,25 @@ impl Cert {
     }
 
     pub fn save_ca(&mut self) {
+        let easycert_dir = utils::easycert_dir();
+
+        let easycert_dir = Path::new(&easycert_dir);
+
+        if !easycert_dir.exists() {
+            DirBuilder::new().create(easycert_dir).unwrap();
+        }
+
         if let Some(ref ca) = self.ca {
             let pem = ca.to_pem().unwrap();
 
-            let mut file = File::create("ca.pem").unwrap();
+            let mut file = File::create(utils::ca_path()).unwrap();
             file.write(pem.as_slice()).unwrap();
         }
 
         if let Some(ref key) = self.pkey {
             let key = key.private_key_to_pem_pkcs8().unwrap();
 
-            let mut file = File::create("ca.key").unwrap();
+            let mut file = File::create(utils::key_path()).unwrap();
             file.write(key.as_slice()).unwrap();
         }
     }

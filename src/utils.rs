@@ -1,5 +1,9 @@
+extern crate dirs;
+
 use std::env;
 use std::str;
+
+use self::dirs::home_dir;
 
 #[cfg(target_os = "linux")]
 extern "C" {
@@ -27,4 +31,16 @@ pub fn hostname() -> String {
         println!("unable to detect platform, use default cn=tyanboot");
         "tyanboot".to_string()
     }
+}
+
+pub fn easycert_dir() -> String {
+    return format!("{}/.easycert", home_dir().unwrap().to_str().unwrap());
+}
+
+pub fn ca_path() -> String {
+    return format!("{}/{}", easycert_dir(), "ca.pem");
+}
+
+pub fn key_path() -> String {
+    return format!("{}/{}", easycert_dir(), "ca.key");
 }
