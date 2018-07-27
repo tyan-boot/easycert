@@ -5,10 +5,15 @@ extern crate gdi32;
 #[cfg(windows)]
 extern crate user32;
 
+use std::fs::File;
+
+use clap::{App, Arg, ArgMatches, SubCommand};
+
 mod cert;
+mod install;
 mod utils;
 
-use clap::{App, Arg, SubCommand};
+use install::install;
 
 fn main() {
     let args = App::new("mkcert")
@@ -63,13 +68,10 @@ fn main() {
                         .help("lengh of key, default 2048")
                         .takes_value(true),
                 ),
-        );
+        )
+        .subcommand(SubCommand::with_name("install").about("install ca to trusted store"));
 
-    let matches = args.get_matches();
-
-    let mut c = cert::Cert::new();
-
-    if let Some(matches) = matches.subcommand_matches("init") {
+    let get_init_args = |matches: &ArgMatches| {
         let length: u32 = matches
             .value_of("length")
             .unwrap_or("2048")
@@ -87,6 +89,16 @@ fn main() {
         } else {
             false
         };
+
+        return (cn, length, force);
+    };
+
+    let matches = args.get_matches();
+
+    let mut c = cert::Cert::new();
+
+    if let Some(matches) = matches.subcommand_matches("init") {
+        let (cn, length, force) = get_init_args(&matches);
 
         c.init(&cn, length, force);
     }
@@ -108,5 +120,19 @@ fn main() {
         } else {
             eprintln!("must provide a name!");
         }
+    }
+
+    if let Some(matches) = matches.subcommand_matches("install") {
+        let ca = File::open(utils::ca_path());
+        let key = File::open(utils::key_path());
+
+        if let (Ok(_ca), Ok(_key)) = (ca, key) {
+        } else {
+            let (cn, length, force) = get_init_args(&matches);
+
+            c.init(&cn, length, force);
+        }
+
+        install();
     }
 }

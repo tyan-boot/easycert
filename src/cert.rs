@@ -23,7 +23,7 @@ use self::openssl::x509::*;
 
 use self::rand::prelude::random;
 
-use super::utils;
+use utils;
 
 pub struct Cert {
     ca: Option<X509>,
