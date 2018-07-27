@@ -50,6 +50,14 @@ pub fn install() {
     } else {
         eprintln!("failed to install to windows trusted store");
     }
+
+    println!("{:}", "if you are using FireFox, please import cert manually in :");
+    println!("{:}", "FireFox -> Preferences -> Security -> View Certificate.");
+    println!("{:}", "and import cert into ca tab.");
+
+    Command::new("explorer")
+        .args(&[utils::easycert_dir().replace("/", "\\")])
+        .spawn().unwrap();
 }
 
 #[cfg(linux)]
