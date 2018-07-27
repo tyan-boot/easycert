@@ -1,19 +1,59 @@
 extern crate dirs;
+extern crate libc;
+extern crate openssl;
 
-use std::fs::copy;
-use std::fs::DirBuilder;
+use std::ffi::CString;
+use std::fs::File;
+use std::io::Read;
 use std::path::Path;
 use std::process::Command;
 
+use self::libc::*;
+use self::openssl::x509::X509;
+
 use utils;
 
+#[cfg(windows)]
+#[link(name = "crypt32")]
+extern "C" {
+    fn CertAddEncodedCertificateToSystemStoreA(
+        store_name: *const c_char,
+        cert_encoded: *const c_uchar,
+        cert_length: usize,
+    ) -> c_int;
+}
+
+#[cfg(windows)]
 pub fn install() {
-    if cfg!(unix) {
-        install_linux();
+    let store_name = CString::new("ROOT").unwrap();
+
+    let mut x509 = File::open(utils::ca_path())
+        .expect(&format!("unable to load ca file in {}", utils::ca_path()));
+
+    let mut x509_pem = Vec::new();
+    x509.read_to_end(&mut x509_pem).unwrap();
+
+    let x509 = X509::from_pem(x509_pem.as_slice()).unwrap();
+    let x509_der = x509.to_der().unwrap();
+
+    let r;
+    unsafe {
+        r = CertAddEncodedCertificateToSystemStoreA(
+            store_name.as_ptr(),
+            x509_der.as_ptr(),
+            x509_der.len(),
+        );
+    }
+
+    if r == 1 {
+        println!("{:}", "install to windows trusted store success");
+    } else {
+        eprintln!("failed to install to windows trusted store");
     }
 }
 
-pub fn install_linux() {
+#[cfg(linux)]
+pub fn install() {
     let ssl_dirs = vec![
         (
             "/etc/ca-certificates/trust-source/anchors",
